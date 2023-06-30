@@ -12,7 +12,7 @@ __all__ = ["get_backend", "near_far_from_aabb", "sph_from_ray", "morton3D", "mor
 @lru_cache()
 def get_backend():
     try:
-        import _raymarching_jz as _backend
+        import raymarching_cuda as _backend
     except ImportError as e:
         logger.warning(e)
         from backend import _backend

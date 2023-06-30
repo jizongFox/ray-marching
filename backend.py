@@ -18,7 +18,7 @@ else:
     raise RuntimeError()
 
 _backend = load(
-    name="_raymarching_jz",
+    name="raymarching_cuda",
     extra_cflags=c_flags,
     extra_cuda_cflags=nvcc_flags,
     sources=[

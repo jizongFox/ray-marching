@@ -1,6 +1,8 @@
-from raymarching import near_far_from_aabb, get_backend
-import torch
 import time
+
+import torch
+
+from raymarching import near_far_from_aabb, get_backend
 
 num_samples = 1
 iters = 1000

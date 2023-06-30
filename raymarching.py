@@ -1,24 +1,23 @@
+from functools import lru_cache
+
 import torch
 from loguru import logger
 from torch.autograd import Function
 from torch.cuda.amp import custom_bwd, custom_fwd
 
-BACKEND = None
+__all__ = ["get_backend", "near_far_from_aabb", "sph_from_ray", "morton3D", "morton3D_invert", "packbits",
+           "flatten_rays", "march_rays_train", "composite_rays_train", "march_rays", "composite_rays"]
 
 
+@lru_cache()
 def get_backend():
-    global BACKEND
+    try:
+        import _raymarching_jz as _backend
+    except ImportError as e:
+        logger.warning(e)
+        from backend import _backend
 
-    if BACKEND is None:
-        try:
-            import _raymarching_jz as _backend
-        except ImportError as e:
-            logger.warning(e)
-            from backend import _backend
-
-        BACKEND = _backend
-
-    return BACKEND
+    return _backend
 
 
 class _near_far_from_aabb(Function):

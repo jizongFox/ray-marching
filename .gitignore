@@ -3,5 +3,6 @@ cmake*
 .vscode
 *egg-info
 __pycache__
-build
+build*
 *.so
+.pytest*

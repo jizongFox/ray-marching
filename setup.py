@@ -4,7 +4,6 @@ from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 _src_path = os.path.dirname(os.path.abspath(__file__))
-print(f"_src_path: {_src_path}")
 nvcc_flags = [
     "-O3",
     "-std=c++14",
@@ -12,7 +11,6 @@ nvcc_flags = [
     "-U__CUDA_NO_HALF_CONVERSIONS__",
     "-U__CUDA_NO_HALF2_OPERATORS__",
 ]
-
 
 c_flags = ["-O3", "-std=c++14"]
 
@@ -29,10 +27,10 @@ pip install -e . # ditto but better (e.g., dependency & metadata handling)
 
 """
 setup(
-    name="raymarching_jz",  # package name, import this to use python API
+    name="raymarching_python",  # package name, import this to use python API
     ext_modules=[
         CUDAExtension(
-            name="_raymarching_jz",  # extension name, import this to use CUDA API
+            name="raymarching_cuda",  # extension name, import this to use CUDA API
             sources=[
                 os.path.join(_src_path, "src", f)
                 for f in [
@@ -40,6 +38,14 @@ setup(
                     "bindings.cpp",
                 ]
             ],
+            include_dirs=[
+                os.path.join(_src_path, "include", f)
+                for f in [
+                    "bindings.h",
+                ]
+
+            ],
+
             extra_compile_args={
                 "cxx": c_flags,
                 "nvcc": nvcc_flags,

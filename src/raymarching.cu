@@ -1,4 +1,3 @@
-
 #include <cuda_runtime.h>
 
 #include <ATen/cuda/CUDAContext.h>
@@ -141,8 +140,9 @@ __global__ void kernel_near_far_from_aabb(const scalar_t *__restrict__ rays_o, c
 }
 
 
-void near_far_from_aabb(at::Tensor rays_o, at::Tensor rays_d, at::Tensor aabb, uint32_t N,
-                        float min_near, at::Tensor nears, at::Tensor fars) {
+void
+near_far_from_aabb(at::Tensor rays_o, at::Tensor rays_d, at::Tensor aabb, uint32_t N, float min_near, at::Tensor nears,
+                   at::Tensor fars) {
 
     static constexpr uint32_t N_THREAD = 1024;
 
@@ -165,13 +165,14 @@ kernel_near_far_from_aabb2(const torch::PackedTensorAccessor32<scalar_t, 2, torc
                            torch::PackedTensorAccessor32<scalar_t, 1, torch::RestrictPtrTraits> nears,
                            torch::PackedTensorAccessor32<scalar_t, 1, torch::RestrictPtrTraits> fars) {
     // parallel per ray
-    const uint32_t n = threadIdx.x + blockIdx.x * blockDim.x;
+    const int n = threadIdx.x + blockIdx.x * blockDim.x;
     const int N = rays_o.size(0);
 
     if (n >= N) { return; }
 
-    const float ox = float(rays_o[n][0]), oy = float(rays_o[n][1]), oz = float(rays_o[n][2]);
-    const float dx = float(rays_d[n][0]), dy = float(rays_d[n][1]), dz = float(rays_d[n][2]);
+//    const float ox = float(rays_o[n][0]), oy = float(rays_o[n][1]), oz = float(rays_o[n][2]);
+    const float ox = rays_o[n][0], oy = rays_o[n][1], oz = rays_o[n][2];
+    const float dx = rays_d[n][0], dy = rays_d[n][1], dz = rays_d[n][2];
     const float rdx = 1 / dx, rdy = 1 / dy, rdz = 1 / dz;
 
     // get near far (assume cube scene)
@@ -208,6 +209,8 @@ kernel_near_far_from_aabb2(const torch::PackedTensorAccessor32<scalar_t, 2, torc
 
     nears[n] = near;
     fars[n] = far;
+
+
 }
 
 std::vector<torch::Tensor>
@@ -217,13 +220,13 @@ near_far_from_aabb2(const at::Tensor rays_o, const at::Tensor rays_d, const at::
     CHECK_INPUT(aabb)
 
 
-    int N = rays_o.size(0);
-    at::Tensor fars = torch::empty({N}, rays_o.options());
-    at::Tensor nears = torch::empty({N}, rays_o.options());
+    int n = rays_o.size(0);
+    at::Tensor fars = torch::empty({n}, rays_o.options());
+    at::Tensor nears = torch::empty({n}, rays_o.options());
 
     const dim3 threads(1024);
 
-    const dim3 blocks(N / 1024 + 1);
+    const dim3 blocks(n / 1024 + 1);
 
     AT_DISPATCH_FLOATING_TYPES_AND_HALF(rays_o.scalar_type(), "near_far_from_aabb2", ([&] {
         kernel_near_far_from_aabb2<scalar_t><<<blocks, threads>>>(

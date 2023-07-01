@@ -1,11 +1,14 @@
+import typing as t
 from functools import lru_cache
 
 import torch
 from loguru import logger
+from torch import Tensor
 from torch.autograd import Function
 from torch.cuda.amp import custom_bwd, custom_fwd
 
-__all__ = ["get_backend", "near_far_from_aabb", "sph_from_ray", "morton3D", "morton3D_invert", "packbits",
+__all__ = ["get_backend", "near_far_from_aabb", "near_far_from_aabb2", "sph_from_ray", "morton3D", "morton3D_invert",
+           "packbits",
            "flatten_rays", "march_rays_train", "composite_rays_train", "march_rays", "composite_rays"]
 
 
@@ -51,6 +54,13 @@ class _near_far_from_aabb(Function):
         get_backend().near_far_from_aabb(rays_o, rays_d, aabb, N, min_near, nears, fars)
 
         return nears, fars
+
+
+def near_far_from_aabb2(rays_o: Tensor, rays_d: Tensor, aabb: Tensor, min_near: float = 0.2) -> t.Tuple[Tensor, Tensor]:
+    assert len(rays_o.shape) == 2, rays_o.shape
+    assert len(rays_d.shape) == 2, rays_d.shape
+    assert tuple(aabb.shape) == (6,), aabb.shape
+    return get_backend().near_far_from_aabb2(rays_o, rays_d, aabb, min_near)
 
 
 class _sph_from_ray(Function):

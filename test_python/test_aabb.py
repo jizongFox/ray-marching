@@ -4,7 +4,7 @@ from unittest import TestCase
 
 import torch
 
-from raymarching import near_far_from_aabb, get_backend
+from raymarching import near_far_from_aabb, near_far_from_aabb2
 
 
 class TestNearFarFromAABB(TestCase):
@@ -31,7 +31,7 @@ class TestNearFarFromAABB(TestCase):
 
         for _ in range(self.iters):
             now = time.time()
-            nears, fars = get_backend().near_far_from_aabb2(self.rays_o, self.rays_d, self.aabb, 0.2)
+            nears, fars = near_far_from_aabb2(self.rays_o, self.rays_d, self.aabb, 0.2)
             torch.cuda.synchronize()
             timer2 += time.time() - now
 
@@ -41,7 +41,7 @@ class TestNearFarFromAABB(TestCase):
     def test_equal(self):
 
         nears, fars = near_far_from_aabb(self.rays_o, self.rays_d, self.aabb, 0.2)
-        nears2, fars2 = get_backend().near_far_from_aabb2(self.rays_o, self.rays_d, self.aabb, 0.2)
+        nears2, fars2 = near_far_from_aabb2(self.rays_o, self.rays_d, self.aabb, 0.2)
         assert torch.allclose(nears, nears2)
         assert torch.allclose(fars, fars2)
 

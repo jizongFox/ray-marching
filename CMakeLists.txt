@@ -43,4 +43,4 @@ target_link_libraries(raymarchinglib PUBLIC Python::Python "${TORCH_LIBRARIES}")
 find_library(RAYMARCHING raymarchinglib cmake-build-debug)
 add_executable(test test.cpp)
 
-target_link_libraries(test PUBLIC Python::Python "${TORCH_LIBRARIES}")
+target_link_libraries(test PUBLIC Python::Python "${TORCH_LIBRARIES}" raymarchinglib)

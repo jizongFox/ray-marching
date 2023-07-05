@@ -165,8 +165,8 @@ kernel_near_far_from_aabb2(const torch::PackedTensorAccessor32<scalar_t, 2, torc
                            torch::PackedTensorAccessor32<scalar_t, 1, torch::RestrictPtrTraits> nears,
                            torch::PackedTensorAccessor32<scalar_t, 1, torch::RestrictPtrTraits> fars) {
     // parallel per ray
-    const int n = threadIdx.x + blockIdx.x * blockDim.x;
-    const int N = rays_o.size(0);
+    const int64_t n = threadIdx.x + blockIdx.x * blockDim.x;
+    const int64_t N = rays_o.size(0);
 
     if (n >= N) { return; }
 
@@ -209,8 +209,6 @@ kernel_near_far_from_aabb2(const torch::PackedTensorAccessor32<scalar_t, 2, torc
 
     nears[n] = near;
     fars[n] = far;
-
-
 }
 
 std::vector<torch::Tensor>
@@ -220,7 +218,7 @@ near_far_from_aabb2(const at::Tensor rays_o, const at::Tensor rays_d, const at::
     CHECK_INPUT(aabb)
 
 
-    int n = rays_o.size(0);
+    int64_t n = rays_o.size(0);
     at::Tensor fars = torch::empty({n}, rays_o.options());
     at::Tensor nears = torch::empty({n}, rays_o.options());
 
